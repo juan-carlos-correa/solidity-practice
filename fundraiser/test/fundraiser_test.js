@@ -7,7 +7,7 @@ contract("Fundraiser", (accounts) => {
   const imageUrl = "beneficiary.png";
   const description = "beneficiary description";
   const beneficiary = accounts[0];
-  const custodian = accounts[1];
+  const owner = accounts[1];
 
   describe("initialization", () => {
     beforeEach(async () => {
@@ -17,7 +17,7 @@ contract("Fundraiser", (accounts) => {
         imageUrl,
         description,
         beneficiary,
-        custodian
+        owner
       );
     });
 
@@ -27,7 +27,7 @@ contract("Fundraiser", (accounts) => {
       const actualimageUrl = await fundraiser.imageUrl();
       const actualDescription = await fundraiser.description();
       const actualBeneficiary = await fundraiser.beneficiary();
-      const actualCustodian = await fundraiser.custodian();
+      const actualOwner = await fundraiser.owner();
 
       assert.equal(actualName, name, "names should match");
       assert.equal(actualWebsite, website, "websites should match");
@@ -38,7 +38,7 @@ contract("Fundraiser", (accounts) => {
         beneficiary,
         "beneficiaries should match"
       );
-      assert.equal(actualCustodian, custodian, "custodians should match");
+      assert.equal(actualOwner, owner, "custodians should match");
     });
   });
 });
