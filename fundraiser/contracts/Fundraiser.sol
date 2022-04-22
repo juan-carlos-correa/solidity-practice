@@ -19,12 +19,16 @@ contract Fundraiser is Ownable {
     string memory _description,
     address payable _beneficiary,
     address _custodian
-  ) public {
+  ) {
     name = _name;
     website = _website;
     imageUrl = _imageUrl;
     description = _description;
     beneficiary = _beneficiary;
     _transferOwnership(_custodian);
+  }
+
+  function setBeneficiary(address payable _beneficiary) public onlyOwner {
+    beneficiary = _beneficiary;
   }
 }
