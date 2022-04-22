@@ -12,6 +12,13 @@ contract Fundraiser is Ownable {
   address payable public beneficiary;
   address public custodian;
 
+  struct Donation {
+    uint256 value;
+    uint256 date;
+  }
+
+  mapping(address => Donation[]) private _donations;
+
   constructor(
     string memory _name,
     string memory _website,
@@ -30,5 +37,32 @@ contract Fundraiser is Ownable {
 
   function setBeneficiary(address payable _beneficiary) public onlyOwner {
     beneficiary = _beneficiary;
+  }
+
+  function myDonationsCount() public view returns (uint256) {
+    return _donations[msg.sender].length;
+  }
+
+  function donate() public payable {
+    Donation memory donation = Donation({
+      value: msg.value,
+      date: block.timestamp
+    });
+
+    _donations[msg.sender].push(donation);
+  }
+
+  function myDonations() public view returns(uint256[] memory values, uint256[] memory dates) {
+    uint256 count = myDonationsCount();
+    values = new uint256[](count);
+    dates = new uint256[](count);
+
+    for (uint256 i = 0; i < count; i++) {
+      Donation storage donation = _donations[msg.sender][i];
+      values[i] = donation.value;
+      dates[i] = donation.date;
+    }
+
+    return (values, dates);
   }
 }
