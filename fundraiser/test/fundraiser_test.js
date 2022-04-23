@@ -193,7 +193,7 @@ contract("Fundraiser", (accounts) => {
         );
       });
 
-      it.only("emits Withdraw event", async () => {
+      it("emits Withdraw event", async () => {
         const tx = await fundraiser.withdraw({ from: owner });
 
         const expectedEvent = "Withdraw";
@@ -201,6 +201,42 @@ contract("Fundraiser", (accounts) => {
 
         assert.equal(expectedEvent, actualEvent, "events should match");
       });
+    });
+  });
+
+  describe("fallback function", () => {
+    const value = web3.utils.toWei("0.0289");
+
+    it("increases the totalDonations amount", async () => {
+      const currentTotalDonations = await fundraiser.totalDonations();
+
+      await web3.eth.sendTransaction({
+        to: fundraiser.address,
+        from: accounts[9],
+        value,
+      });
+
+      const newTotalDonations = await fundraiser.totalDonations();
+
+      const diff = newTotalDonations - currentTotalDonations;
+
+      assert.equal(diff, value, "difference should match the dontaion value");
+    });
+
+    it("increases the donationsCount", async () => {
+      const currentDonationsCount = await fundraiser.donationsCount();
+
+      await web3.eth.sendTransaction({
+        to: fundraiser.address,
+        from: accounts[9],
+        value,
+      });
+
+      const newDonationsCount = await fundraiser.donationsCount();
+
+      const diff = newDonationsCount - currentDonationsCount;
+
+      assert.equal(1, diff, "donationsCount should increment by 1");
     });
   });
 });
