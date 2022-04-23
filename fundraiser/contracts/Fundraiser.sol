@@ -24,6 +24,8 @@ contract Fundraiser is Ownable {
 
   mapping(address => Donation[]) private _donations;
 
+  event DonationReceived(address indexed donor, uint256 value);
+
   constructor(
     string memory _name,
     string memory _website,
@@ -58,6 +60,8 @@ contract Fundraiser is Ownable {
 
     totalDonations = totalDonations.add(msg.value);
     donationsCount++;
+
+    emit DonationReceived(msg.sender, msg.value);
   }
 
   function myDonations() public view returns(uint256[] memory values, uint256[] memory dates) {
