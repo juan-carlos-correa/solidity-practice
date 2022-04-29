@@ -1,6 +1,8 @@
 import React, {useState, useEffect} from 'react'
+
 import FundraiserFactory from './contracts/FundraiserFactory.json'
 import getWeb3 from './getWeb3'
+import {AppRouter} from './components/app-router'
 
 export const App = () => {
   const [web3State, setWeb3State] = useState({
@@ -51,7 +53,7 @@ export const App = () => {
     return <div>Loading Web3, accounts, and contract...</div>
   }
 
-  return <h1>Good to Go!</h1>
+  return <AppRouter />
 }
 
 export default App
