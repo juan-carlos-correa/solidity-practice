@@ -4,15 +4,18 @@ import {BrowserRouter} from 'react-router-dom'
 import CssBaseline from '@mui/material/CssBaseline'
 
 import App from './App'
+import {ContractProvider} from './components/contract-provider'
 import reportWebVitals from './reportWebVitals'
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
   <React.StrictMode>
-    <CssBaseline />
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <ContractProvider>
+      <CssBaseline />
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </ContractProvider>
   </React.StrictMode>,
 )
 
