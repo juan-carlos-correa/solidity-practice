@@ -9,7 +9,7 @@ import Typography from '@mui/material/Typography'
 import {Contract} from '../../providers'
 
 export const AddFundraiser = () => {
-  const web3 = React.useContext(Contract)
+  const {factoryFundraiser} = React.useContext(Contract)
 
   const handleSubmit = async e => {
     e.preventDefault()
@@ -18,7 +18,7 @@ export const AddFundraiser = () => {
       e.target.elements
 
     try {
-      await web3.contract.methods
+      await factoryFundraiser.contract.methods
         .createFundraiser(
           name.value,
           websiteUrl.value,
@@ -26,7 +26,7 @@ export const AddFundraiser = () => {
           description.value,
           beneficiary.value,
         )
-        .send({from: web3.accounts[0]})
+        .send({from: factoryFundraiser.accounts[0]})
       alert('created!')
     } catch (error) {
       console.log(error)

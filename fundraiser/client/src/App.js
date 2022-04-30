@@ -4,9 +4,9 @@ import {AppRouter} from './components/app-router'
 import {Contract} from './providers'
 
 export const App = () => {
-  const web3State = React.useContext(Contract)
+  const {isWeb3Loading} = React.useContext(Contract)
 
-  if (!web3State.web3) {
+  if (isWeb3Loading) {
     return <div>Loading Web3, accounts, and contract...</div>
   }
 

@@ -9,11 +9,11 @@ export const Home = () => {
   const [funds, setFunds] = React.useState([])
   const [isLoading, setIsLoading] = React.useState(true)
 
-  const web3 = React.useContext(Contract)
+  const {factoryFundraiser} = React.useContext(Contract)
 
   const loadFundraisersList = React.useCallback(async () => {
     try {
-      const contractFunds = await web3.contract.methods
+      const contractFunds = await factoryFundraiser.contract.methods
         .fundraisers(10, 0)
         .call()
       setFunds(contractFunds)
@@ -22,7 +22,7 @@ export const Home = () => {
     } finally {
       setIsLoading(false)
     }
-  }, [web3.contract.methods])
+  }, [factoryFundraiser.contract.methods])
 
   React.useEffect(() => {
     loadFundraisersList()
@@ -35,7 +35,7 @@ export const Home = () => {
   return (
     <>
       <Typography sx={{mt: 3}} variant="h4" component="h1">
-        Home
+        Available Funds
       </Typography>
       <Grid container sx={{mt: 3}}>
         {funds.map(fundAddress => (

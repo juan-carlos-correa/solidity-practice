@@ -4,7 +4,10 @@ import {useFundraiserContract} from '../hooks/use-fundraiser-contract'
 import {Contract} from '../providers'
 
 export const ContractProvider = ({children}) => {
-  const web3State = useFundraiserContract()
+  const {factoryFundraiser, getFundData, isWeb3Loading} =
+    useFundraiserContract()
 
-  return <Contract.Provider value={web3State}>{children}</Contract.Provider>
+  const value = {factoryFundraiser, getFundData, isWeb3Loading}
+
+  return <Contract.Provider value={value}>{children}</Contract.Provider>
 }
