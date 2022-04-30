@@ -31,7 +31,7 @@ export const AddFundraiser = () => {
           beneficiary.value,
         )
         .send({from: factoryFundraiser.accounts[0]})
-      openSnackbar('The fundraiser was created succesfully!')
+      openSnackbar('The fundraiser was created successfully!')
       navigate('/')
     } catch (error) {
       console.log(error)

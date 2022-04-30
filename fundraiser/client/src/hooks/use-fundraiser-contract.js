@@ -67,5 +67,5 @@ export const useFundraiserContract = () => {
     [web3.eth],
   )
 
-  return {factoryFundraiser, getFundData, isWeb3Loading}
+  return {factoryFundraiser, getFundData, isWeb3Loading, web3}
 }
