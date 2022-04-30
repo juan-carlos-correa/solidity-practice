@@ -5,17 +5,20 @@ import CssBaseline from '@mui/material/CssBaseline'
 
 import App from './App'
 import {ContractProvider} from './components/contract-provider'
+import {GlobalSnackbarProvider} from './components/global-snackbar-provider'
 import reportWebVitals from './reportWebVitals'
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
   <React.StrictMode>
-    <ContractProvider>
-      <CssBaseline />
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </ContractProvider>
+    <GlobalSnackbarProvider>
+      <ContractProvider>
+        <CssBaseline />
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </ContractProvider>
+    </GlobalSnackbarProvider>
   </React.StrictMode>,
 )
 

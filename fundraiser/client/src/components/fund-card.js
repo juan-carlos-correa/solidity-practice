@@ -49,7 +49,7 @@ export const FundCard = ({fundAddress}) => {
         </Typography>
 
         <Typography sx={{fontSize: 14}} color="text.secondary" gutterBottom>
-          Total: {fundData.totalDonations}
+          Total donations: {fundData.totalDonations}
         </Typography>
 
         <Typography sx={{mb: 1.5}} variant="body2" color="text.secondary">
