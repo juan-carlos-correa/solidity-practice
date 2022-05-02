@@ -5,6 +5,7 @@ import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
 import CardActions from '@mui/material/CardActions'
 import Button from '@mui/material/Button'
+import cc from 'cryptocompare'
 
 import {Contract, SnackbarContext} from '../providers'
 import {FundraiserDialog} from './fundraiser-dialog'
@@ -21,9 +22,11 @@ export const FundCard = ({fundAddress}) => {
     contract: null,
     accounts: [],
   })
+  const [usdDonationAmount, setUsdDonationAmount] = React.useState(0)
+
   const {openSnackbar} = React.useContext(SnackbarContext)
 
-  const {getFundData} = React.useContext(Contract)
+  const {getFundData, web3} = React.useContext(Contract)
 
   const loadFundData = React.useCallback(async () => {
     const {contract, accounts} = await getFundData(fundAddress)
@@ -34,18 +37,25 @@ export const FundCard = ({fundAddress}) => {
     const description = await contract.methods.description().call()
     const totalDonations = await contract.methods.totalDonations().call()
 
+    if (totalDonations) {
+      const exchangeRateEthUsd = await cc.price('ETH', ['USD'])
+      const eth = web3.utils.fromWei(totalDonations, 'ether')
+      const usdDonationAmount = exchangeRateEthUsd.USD * eth
+      setUsdDonationAmount(usdDonationAmount)
+    }
+
     setFundData({name, website, imageUrl, description, totalDonations})
     setFundRaiserContract({contract, accounts})
-  }, [getFundData, fundAddress])
+  }, [getFundData, fundAddress, web3.utils])
 
-  const handleDonate = async usdAmount => {
+  const handleDonate = async donationAmount => {
     try {
-      const result = await fundRaiserContract.contract.methods.donate().send({
+      await fundRaiserContract.contract.methods.donate().send({
         from: fundRaiserContract.accounts[0],
-        value: usdAmount,
+        value: donationAmount,
         gas: 650000,
       })
-      console.log(result)
+
       openSnackbar('Donation successfully!')
     } catch (e) {
       console.log(e)
@@ -71,7 +81,7 @@ export const FundCard = ({fundAddress}) => {
           </Typography>
 
           <Typography sx={{fontSize: 14}} color="text.secondary" gutterBottom>
-            Total donated: {fundData.totalDonations}
+            Total donated: {parseFloat(usdDonationAmount).toFixed(2)} USD.
           </Typography>
         </CardContent>
         <CardActions>
@@ -87,6 +97,7 @@ export const FundCard = ({fundAddress}) => {
           <FundraiserDialog
             name={fundData.name}
             description={fundData.description}
+            imageUrl={fundData.imageUrl}
             handleDonate={handleDonate}
           />
         </CardActions>

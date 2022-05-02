@@ -1,4 +1,4 @@
-import {useState, useContext} from 'react'
+import {useContext, useEffect, useState} from 'react'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
@@ -11,12 +11,13 @@ import InputAdornment from '@mui/material/InputAdornment'
 import FormHelperText from '@mui/material/FormHelperText'
 import FormControl from '@mui/material/FormControl'
 import Box from '@mui/material/Box'
+import cc from 'cryptocompare'
 
 import {Contract} from '../providers'
 
 export const FundraiserDialog = ({name, description, handleDonate}) => {
   const [open, setOpen] = useState(false)
-  const [calculatedWei, setCalculatedWei] = useState(0)
+  const [exchangeRateEthUsd, setExchangeRateEthUsd] = useState(0)
 
   const {web3} = useContext(Contract)
 
@@ -31,24 +32,31 @@ export const FundraiserDialog = ({name, description, handleDonate}) => {
   const handleSubmit = async e => {
     e.preventDefault()
     const {usdAmount} = e.target.elements
-    handleDonate(usdAmount.value)
-  }
 
-  const handleInputChange = e => {
-    const {value} = e.target
-
-    if (!value) {
+    if (!usdAmount.value) {
       return
     }
 
-    const wei = web3.utils.toWei(value)
-    setCalculatedWei(wei)
+    const ethAmount = usdAmount.value / exchangeRateEthUsd
+
+    const donationAmount = web3.utils.toWei(ethAmount.toString())
+
+    handleDonate(donationAmount)
   }
+
+  useEffect(() => {
+    const getRate = async () => {
+      const exchangeRateEth = await cc.price('ETH', ['USD'])
+      setExchangeRateEthUsd(exchangeRateEth.USD)
+    }
+
+    getRate()
+  }, [])
 
   return (
     <>
       <Button size="small" variant="contained" onClick={handleClickOpen}>
-        Learn more
+        Donate
       </Button>
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Donate to {name}</DialogTitle>
@@ -61,19 +69,19 @@ export const FundraiserDialog = ({name, description, handleDonate}) => {
             onSubmit={handleSubmit}
           >
             <FormControl fullWidth sx={{m: 1}} variant="standard">
-              <InputLabel htmlFor="standard-adornment-amount">
-                US dollar Amount
-              </InputLabel>
+              <InputLabel>USD Amount to donate</InputLabel>
               <Input
-                defaultValue={0}
                 startAdornment={
                   <InputAdornment position="start">$</InputAdornment>
                 }
-                onChange={handleInputChange}
                 type="number"
                 name="usdAmount"
+                inputProps={{min: '0', step: '0.01'}}
               />
-              <FormHelperText>Aprox wei value: {calculatedWei}</FormHelperText>
+              <FormHelperText>
+                Current ETH exchange rate: {exchangeRateEthUsd} USD. Validate it
+                on metamask
+              </FormHelperText>
             </FormControl>
           </Box>
         </DialogContent>
@@ -81,7 +89,7 @@ export const FundraiserDialog = ({name, description, handleDonate}) => {
           <Button variant="contained" onClick={handleClose}>
             Cancel
           </Button>
-          <Button type="submit" form="donation-form" onClick={handleClose}>
+          <Button type="submit" form="donation-form">
             Donate
           </Button>
         </DialogActions>
