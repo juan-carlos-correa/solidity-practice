@@ -77,7 +77,7 @@ export const Home = () => {
 
       <Grid container sx={{my: 4}} spacing={2}>
         {funds.map(fundAddress => (
-          <Grid item key={fundAddress}>
+          <Grid item key={fundAddress} xs={12} md={4}>
             <FundCard fundAddress={fundAddress} />
           </Grid>
         ))}

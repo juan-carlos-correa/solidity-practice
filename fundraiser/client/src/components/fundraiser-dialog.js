@@ -11,11 +11,18 @@ import InputAdornment from '@mui/material/InputAdornment'
 import FormHelperText from '@mui/material/FormHelperText'
 import FormControl from '@mui/material/FormControl'
 import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import Divider from '@mui/material/Divider'
 import cc from 'cryptocompare'
 
 import {Contract} from '../providers'
 
-export const FundraiserDialog = ({name, description, handleDonate}) => {
+export const FundraiserDialog = ({
+  name,
+  description,
+  handleDonate,
+  myDonations,
+}) => {
   const [open, setOpen] = useState(false)
   const [exchangeRateEthUsd, setExchangeRateEthUsd] = useState(0)
 
@@ -53,6 +60,27 @@ export const FundraiserDialog = ({name, description, handleDonate}) => {
     getRate()
   }, [])
 
+  const renderMyDonationsList = () => {
+    const donationList = []
+
+    for (let i = 0; i < myDonations.values.length; i++) {
+      const weiAmount = myDonations.values[i]
+      const ethAmount = web3.utils.fromWei(weiAmount)
+      const userDonation = exchangeRateEthUsd * ethAmount
+      const donationDate = myDonations.dates[i]
+      donationList.push({
+        donationAmount: userDonation.toFixed(2),
+        date: donationDate,
+      })
+    }
+
+    return donationList.map(({donationAmount, date}) => (
+      <div key={date}>
+        <Typography variant="caption">{donationAmount}</Typography>
+      </div>
+    ))
+  }
+
   return (
     <>
       <Button size="small" variant="contained" onClick={handleClickOpen}>
@@ -84,6 +112,15 @@ export const FundraiserDialog = ({name, description, handleDonate}) => {
               </FormHelperText>
             </FormControl>
           </Box>
+          <Divider sx={{mt: 3, mb: 3}} />
+          {myDonations.values.length && (
+            <>
+              <Typography varaint="h5" component="p">
+                My donations
+              </Typography>
+              {renderMyDonationsList()}
+            </>
+          )}
         </DialogContent>
         <DialogActions>
           <Button variant="contained" onClick={handleClose}>

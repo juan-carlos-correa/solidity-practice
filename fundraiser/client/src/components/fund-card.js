@@ -1,4 +1,4 @@
-import React from 'react'
+import {useCallback, useState, useContext, useEffect} from 'react'
 import Card from '@mui/material/Card'
 import CardMedia from '@mui/material/CardMedia'
 import CardContent from '@mui/material/CardContent'
@@ -11,24 +11,27 @@ import {Contract, SnackbarContext} from '../providers'
 import {FundraiserDialog} from './fundraiser-dialog'
 
 export const FundCard = ({fundAddress}) => {
-  const [fundData, setFundData] = React.useState({
+  const [fundData, setFundData] = useState({
     name: '',
     website: '',
     imageUrl: '',
     description: '',
     totalDonations: 0,
   })
-  const [fundRaiserContract, setFundRaiserContract] = React.useState({
+  const [fundRaiserContract, setFundRaiserContract] = useState({
     contract: null,
     accounts: [],
   })
-  const [usdDonationAmount, setUsdDonationAmount] = React.useState(0)
+  const [usdDonationAmount, setUsdDonationAmount] = useState(0)
+  const [myDonations, setMyDonations] = useState({
+    dates: [],
+    values: [],
+  })
 
-  const {openSnackbar} = React.useContext(SnackbarContext)
+  const {openSnackbar} = useContext(SnackbarContext)
+  const {getFundData, web3} = useContext(Contract)
 
-  const {getFundData, web3} = React.useContext(Contract)
-
-  const loadFundData = React.useCallback(async () => {
+  const loadFundData = useCallback(async () => {
     const {contract, accounts} = await getFundData(fundAddress)
 
     const name = await contract.methods.name().call()
@@ -36,6 +39,9 @@ export const FundCard = ({fundAddress}) => {
     const imageUrl = await contract.methods.imageUrl().call()
     const description = await contract.methods.description().call()
     const totalDonations = await contract.methods.totalDonations().call()
+    const myDonations = await contract.methods.myDonations().call({
+      from: accounts[0],
+    })
 
     if (totalDonations) {
       const exchangeRateEthUsd = await cc.price('ETH', ['USD'])
@@ -44,6 +50,7 @@ export const FundCard = ({fundAddress}) => {
       setUsdDonationAmount(usdDonationAmount)
     }
 
+    setMyDonations(myDonations)
     setFundData({name, website, imageUrl, description, totalDonations})
     setFundRaiserContract({contract, accounts})
   }, [getFundData, fundAddress, web3.utils])
@@ -62,7 +69,7 @@ export const FundCard = ({fundAddress}) => {
     }
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     loadFundData()
   }, [loadFundData])
 
@@ -99,6 +106,7 @@ export const FundCard = ({fundAddress}) => {
             description={fundData.description}
             imageUrl={fundData.imageUrl}
             handleDonate={handleDonate}
+            myDonations={myDonations}
           />
         </CardActions>
       </Card>
