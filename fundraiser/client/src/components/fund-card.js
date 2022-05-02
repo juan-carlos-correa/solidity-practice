@@ -10,6 +10,7 @@ import cc from 'cryptocompare'
 import {Contract, SnackbarContext} from '../providers'
 import {FundraiserDialog} from './fundraiser-dialog'
 
+// TODO: add tests and then refactor this implementation
 export const FundCard = ({fundAddress}) => {
   const [fundData, setFundData] = useState({
     name: '',
