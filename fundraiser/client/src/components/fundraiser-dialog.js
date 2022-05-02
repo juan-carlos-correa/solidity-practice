@@ -15,18 +15,21 @@ import Typography from '@mui/material/Typography'
 import Divider from '@mui/material/Divider'
 import cc from 'cryptocompare'
 
-import {Contract} from '../providers'
+import {Contract, SnackbarContext} from '../providers'
 
 export const FundraiserDialog = ({
   name,
   description,
   handleDonate,
   myDonations,
+  isOwner,
+  fundRaiserContract,
 }) => {
   const [open, setOpen] = useState(false)
   const [exchangeRateEthUsd, setExchangeRateEthUsd] = useState(0)
 
   const {web3} = useContext(Contract)
+  const {openSnackbar} = useContext(SnackbarContext)
 
   const handleClickOpen = () => {
     setOpen(true)
@@ -70,21 +73,35 @@ export const FundraiserDialog = ({
       const donationDate = myDonations.dates[i]
       donationList.push({
         donationAmount: userDonation.toFixed(2),
+        ethAmount,
         date: donationDate,
       })
     }
 
-    return donationList.map(({donationAmount, date}) => (
+    return donationList.map(({donationAmount, date, ethAmount}) => (
       <div key={date}>
-        <Typography variant="caption">{donationAmount}</Typography>
+        <Typography variant="caption">
+          {donationAmount} USD. (ETH: {ethAmount})
+        </Typography>
       </div>
     ))
+  }
+
+  const handleWithdrawalFunds = async () => {
+    try {
+      await fundRaiserContract.contract.methods.withdraw().send({
+        from: fundRaiserContract.accounts[0],
+      })
+      openSnackbar('Funds withdrawn successfully!')
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   return (
     <>
       <Button size="small" variant="contained" onClick={handleClickOpen}>
-        Donate
+        See more
       </Button>
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Donate to {name}</DialogTitle>
@@ -111,24 +128,43 @@ export const FundraiserDialog = ({
                 on metamask
               </FormHelperText>
             </FormControl>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+              }}
+            >
+              <Button variant="contained" type="submit" form="donation-form">
+                Donate
+              </Button>
+            </Box>
           </Box>
           <Divider sx={{mt: 3, mb: 3}} />
           {myDonations.values.length && (
             <>
-              <Typography varaint="h5" component="p">
+              <Typography variant="h6" component="h2">
                 My donations
               </Typography>
-              {renderMyDonationsList()}
+              <Typography>
+                Given the current exchange rate: 1 ETH = {exchangeRateEthUsd}{' '}
+                USD.
+              </Typography>
+
+              <Box sx={{mt: 2}}>{renderMyDonationsList()}</Box>
             </>
           )}
         </DialogContent>
         <DialogActions>
-          <Button variant="contained" onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button type="submit" form="donation-form">
-            Donate
-          </Button>
+          <Button onClick={handleClose}>Close</Button>
+          {isOwner && (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleWithdrawalFunds}
+            >
+              Withdrawal
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
     </>

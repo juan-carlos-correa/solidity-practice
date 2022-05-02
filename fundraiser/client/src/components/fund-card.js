@@ -27,6 +27,7 @@ export const FundCard = ({fundAddress}) => {
     dates: [],
     values: [],
   })
+  const [isOwner, setIsOwner] = useState(false)
 
   const {openSnackbar} = useContext(SnackbarContext)
   const {getFundData, web3} = useContext(Contract)
@@ -34,26 +35,34 @@ export const FundCard = ({fundAddress}) => {
   const loadFundData = useCallback(async () => {
     const {contract, accounts} = await getFundData(fundAddress)
 
+    const contractBalance = await web3.eth.getBalance(fundAddress)
     const name = await contract.methods.name().call()
     const website = await contract.methods.website().call()
     const imageUrl = await contract.methods.imageUrl().call()
     const description = await contract.methods.description().call()
-    const totalDonations = await contract.methods.totalDonations().call()
+    const owner = await contract.methods.owner().call()
     const myDonations = await contract.methods.myDonations().call({
       from: accounts[0],
     })
 
-    if (totalDonations) {
+    if (contractBalance) {
       const exchangeRateEthUsd = await cc.price('ETH', ['USD'])
-      const eth = web3.utils.fromWei(totalDonations, 'ether')
+      const eth = web3.utils.fromWei(contractBalance, 'ether')
       const usdDonationAmount = exchangeRateEthUsd.USD * eth
       setUsdDonationAmount(usdDonationAmount)
     }
 
+    setIsOwner(accounts[0] === owner)
     setMyDonations(myDonations)
-    setFundData({name, website, imageUrl, description, totalDonations})
+    setFundData({
+      name,
+      website,
+      imageUrl,
+      description,
+      totalDonations: contractBalance,
+    })
     setFundRaiserContract({contract, accounts})
-  }, [getFundData, fundAddress, web3.utils])
+  }, [getFundData, fundAddress, web3.eth, web3.utils])
 
   const handleDonate = async donationAmount => {
     try {
@@ -107,6 +116,8 @@ export const FundCard = ({fundAddress}) => {
             imageUrl={fundData.imageUrl}
             handleDonate={handleDonate}
             myDonations={myDonations}
+            isOwner={isOwner}
+            fundRaiserContract={fundRaiserContract}
           />
         </CardActions>
       </Card>
